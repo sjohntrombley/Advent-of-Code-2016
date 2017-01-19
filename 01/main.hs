@@ -8,9 +8,12 @@ data Direction = Left Int | Right Int           deriving Show
 data Orientation = North | East | South | West  deriving Show
 data Position = Position Orientation (Int,Int)  deriving Show
 
--- The program takes two arguments. The first is the run mode, which is either
--- -1, -2, or -12, signifying which part of the problem is being solved. The
--- second argument is the name of the file with the directions in it.
+-- Binding:       main
+-- Description:   Gets program arguemnts and program name. The first argument
+--    is run mode (either '-1', '-2', or '-12'. The second is the name of the
+--    file containing directions. The String read from the input file is parsed
+--    by the parse function, then either solve1, solve2, or both is called on
+--    the parsed input depending on run mode.
 main :: IO ()
 main = do
   args  <- getArgs
@@ -29,26 +32,33 @@ main = do
       "\nPart 2:\t", show $ solve2 directions]
     else error "Invalid run mode."
 
--- parse turns a string containing formatted directions into a list of
--- Directions. It wraps parse', which is a tail recursive helper.
+-- Function:      parse
+-- Arguemnt:      Input string of directions
+-- Description:   Takes an input string as an argument, and returns a list of
+--    Directions. It simply wraps parse' and passes it initial parameters of an
+--    empty partial token and an empty partial direction list.
 parse :: String -> [Direction]
 parse = parse' "" []
 
--- parse' takes a partial reversd token, a partial reversed direction list, and
--- an input string, and returns the direction list. It does this recursively.
+-- Function:      parse'
+-- Arguments:
+--    * (pt::String) is a partially read token
+--    * (pdl::[Direction]) is a list of directions already parsed in reversed
+--        order
+--    * (cs::String) is the remaining input String
+-- Description:   parse' is a recursive helper function for parsing the cs. If
+--    cs is nonempty, the head character is read. If it is part of a token, it
+--    is added to the head of pt. If it is not, pt is considered to have a
+--    complete token. The String is reversed, and turned into a Direction with
+--    mkDirection. This Direction is added to the head of pdl. All non-token
+--    characters are stripped from the head of cs, and parse' is called
+--    recursively. If cs is empty and pt is empty, then cs had trailing
+--    non-tken characters, so pdl is reversed and returned. If pt is nonempty,
+--    cs had no trailing non-token characters, and the last token is parsed and
+--    added to the head of pdl, which is then reversed and returned.
 parse' :: String -> [Direction] -> String -> [Direction]
--- The base case of the recursion checks to see if the partial token is empty,
--- which will happen if the string has trailing non-token characters. If the
--- partial token is nonempty, it should contain a complete token, which is
--- prepended to the partial list. The partial list is now reversed in either
--- case to give the parsed direction list.
 parse' pt pdl [] = if pt=="" then reverse pdl
   else reverse (mkDirection (reverse pt):pdl)
--- Checks the character at the head of the string is part of a token. If so, 
--- the character is added to the partial token, and the function is called
--- recursively on the remaining list. If not, the token is complete. It is
--- reversed, parsed into a Direction, then prepended to the partial direction
--- list. parse' is then called recursively.
 parse' pt pdl (c:cs) = if isTokenC c
   then parse' (c:pt) pdl cs
   else let 
@@ -77,6 +87,10 @@ solve1 dirs = let
 solve2 :: [Direction] -> Int
 solve2 = solve2' (Position North (0,0)) [(0,0)]
 
+-- solve2' takes a position, a history of past locations, and a list of
+-- directions, and returns the distance to the first location visited twice. It
+-- does this by calculating all of the points between its initial position and
+-- its final position after the next move in the direction list. q
 solve2' :: Position -> [(Int,Int)] -> [Direction] -> Int
 solve2' _ _ [] = error "No location visited twiced."
 solve2' op@(Position _ oloc) h (d:ds) = let
