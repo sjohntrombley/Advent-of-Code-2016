@@ -22,15 +22,16 @@ main = do
 processInput :: String->[[Int]]
 processInput = (map ((map read).words)).lines
 
-isPossible t = x+y>z where
-  (x:y:z:[]) = sort t
+isPossible :: [Int]->Bool
+isPossible t = if length t /= 3 then error "A triangle has 3 sides.\n"
+  else let (x:y:z:[]) = sort t in x+y>z
 
-flattenInput il = (reverse a)++(reverse b)++(reverse c) where
-  rfi f [] = f
-  rfi (f1,f2,f3) ((x1:x2:x3:[]):xs) = rfi (x1:f1,x2:f2,x3:f3) xs
-  (a,b,c) = rfi ([],[],[]) il
+flattenInput il = let (a,b,c) = rfi ([],[],[]) il 
+  in (reverse a)++(reverse b)++(reverse c)
 
-groupIn3s [] = []
+rfi f [] = f
+rfi (f1,f2,f3) ((x1:x2:x3:[]):xs) = rfi (x1:f1,x2:f2,x3:f3) xsgroupIn3s [] = []
+
 groupIn3s (x:y:z:xs) = [x,y,z] : groupIn3s xs
 groupIn3s _ = error "Length of list is not congruent to 0 (mod 3)."
 
